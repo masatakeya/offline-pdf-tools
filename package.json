@@ -1,0 +1,18 @@
+{
+  "name": "offline-pdf-tools",
+  "version": "1.0.0",
+  "description": "ブラウザの中だけで動くPDFツール（結合・分割・ページ抽出・ページ削除）",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "python3 -m http.server 8080 --directory public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@neslinesli93/qpdf-wasm": "^0.3.0",
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.4.299"
+  },
+  "private": true,
+  "type": "module"
+}

@@ -1,0 +1,2 @@
+qpdf (https://github.com/qpdf/qpdf) is licensed under the Apache License 2.0.
+WebAssembly build: @neslinesli93/qpdf-wasm (ISC License).

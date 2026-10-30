@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PDFツール｜結合・分割・抽出・削除</title>
+  <meta name="description" content="PDFの結合・分割・ページ抽出・ページ削除を、ブラウザの中だけで行うツールです。ファイルはどこにも送信されません。">
+  <meta name="theme-color" content="#1d5f8c">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PDFツール">
+  <link rel="stylesheet" href="./css/style.css">
+  <script type="module" src="./js/app.js"></script>
+</head>
+<body>
+  <div class="update-banner" id="update-banner" hidden role="status">
+    <span>新しい版があります。更新すると、作業中の内容は消えます。</span>
+    <button type="button" id="update-button" class="btn btn-small">更新する</button>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap">
+      <h1>PDFツール</h1>
+      <p class="lead">PDFの結合・分割・ページ抽出・ページ削除を、このブラウザの中だけで行います。ファイルはどこにも送信されません。</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs" role="tablist" aria-label="機能の切り替え">
+      <button type="button" role="tab" id="tab-merge" aria-controls="panel-merge" aria-selected="true">結合</button>
+      <button type="button" role="tab" id="tab-split" aria-controls="panel-split" aria-selected="false" tabindex="-1">分割</button>
+      <button type="button" role="tab" id="tab-extract" aria-controls="panel-extract" aria-selected="false" tabindex="-1">ページ抽出</button>
+      <button type="button" role="tab" id="tab-delete" aria-controls="panel-delete" aria-selected="false" tabindex="-1">ページ削除</button>
+    </nav>
+
+    <!-- 結合 -->
+    <section class="panel" id="panel-merge" role="tabpanel" aria-labelledby="tab-merge">
+      <p class="panel-desc">複数のPDFを、並べた順に1つのファイルにまとめます。</p>
+      <label class="dropzone">
+        <input type="file" accept="application/pdf,.pdf" multiple class="visually-hidden">
+        <span class="dropzone-main">PDFを選ぶ（複数可）</span>
+        <span class="dropzone-sub">または、ここにドラッグ＆ドロップ</span>
+      </label>
+      <div class="messages" aria-live="polite"></div>
+      <ol class="file-list" aria-label="結合するファイル"></ol>
+      <p class="list-summary" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary run" disabled>結合する</button>
+        <button type="button" class="btn btn-ghost clear" hidden>すべて外す</button>
+      </div>
+      <div class="result" aria-live="polite"></div>
+    </section>
+
+    <!-- 分割 -->
+    <section class="panel" id="panel-split" role="tabpanel" aria-labelledby="tab-split" hidden>
+      <p class="panel-desc">1つのPDFを、複数のファイルに分けます。複数できたときはZIPにまとめて保存します。</p>
+      <label class="dropzone">
+        <input type="file" accept="application/pdf,.pdf" class="visually-hidden">
+        <span class="dropzone-main">PDFを選ぶ</span>
+        <span class="dropzone-sub">または、ここにドラッグ＆ドロップ</span>
+      </label>
+      <div class="messages" aria-live="polite"></div>
+      <div class="file-info" hidden></div>
+      <fieldset class="options" disabled>
+        <legend>分け方</legend>
+        <label class="option">
+          <input type="radio" name="split-mode" value="range" checked>
+          <span>範囲を指定する</span>
+        </label>
+        <div class="option-detail" data-for="range">
+          <input type="text" class="text-input" id="split-range" inputmode="numeric" autocomplete="off" placeholder="例：1-3, 5, 7-9" aria-describedby="split-range-help">
+          <p class="help" id="split-range-help">カンマで区切った範囲ごとに1つのファイルになります（例の場合は3ファイル）。</p>
+        </div>
+        <label class="option">
+          <input type="radio" name="split-mode" value="each">
+          <span>1ページずつ、すべて別のファイルにする</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="split-mode" value="every">
+          <span>決まったページ数ごとに分ける</span>
+        </label>
+        <div class="option-detail" data-for="every">
+          <label class="inline-field"><input type="number" class="text-input num" id="split-every" min="1" step="1" value="2" inputmode="numeric"> ページごと</label>
+          <p class="help">最後のファイルは、残りのページだけになります。</p>
+        </div>
+      </fieldset>
+      <div class="actions">
+        <button type="button" class="btn btn-primary run" disabled>分割する</button>
+      </div>
+      <div class="result" aria-live="polite"></div>
+    </section>
+
+    <!-- ページ抽出 -->
+    <section class="panel page-picker" id="panel-extract" role="tabpanel" aria-labelledby="tab-extract" hidden
+             data-mode="extract">
+      <p class="panel-desc">選んだページだけを取り出して、1つのPDFにします。ページは元の順序のまま並びます。</p>
+    </section>
+
+    <!-- ページ削除 -->
+    <section class="panel page-picker" id="panel-delete" role="tabpanel" aria-labelledby="tab-delete" hidden
+             data-mode="delete">
+      <p class="panel-desc">選んだページを取り除いたPDFを作ります。</p>
+    </section>
+
+    <template id="page-picker-template">
+      <label class="dropzone">
+        <input type="file" accept="application/pdf,.pdf" class="visually-hidden">
+        <span class="dropzone-main">PDFを選ぶ</span>
+        <span class="dropzone-sub">または、ここにドラッグ＆ドロップ</span>
+      </label>
+      <div class="messages" aria-live="polite"></div>
+      <div class="file-info" hidden></div>
+      <div class="picker" hidden>
+        <div class="picker-controls">
+          <label class="field-label" for="">ページ範囲</label>
+          <input type="text" class="text-input range-input" inputmode="numeric" autocomplete="off" placeholder="例：1-3, 5">
+          <p class="help range-help">ページの画像をクリックしても選べます。Shiftキーを押しながらクリックすると、続けて範囲を選べます。</p>
+          <p class="range-error" role="alert" hidden></p>
+          <div class="picker-buttons">
+            <button type="button" class="btn btn-small btn-ghost sel-all">すべて選択</button>
+            <button type="button" class="btn btn-small btn-ghost sel-none">選択を解除</button>
+            <button type="button" class="btn btn-small btn-ghost sel-invert">選択を反転</button>
+            <span class="sel-count" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="thumbs" role="group"></div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-primary run" disabled></button>
+      </div>
+      <div class="result" aria-live="polite"></div>
+    </template>
+
+    <p class="caution">しおり、ページ内リンク、入力フォームは、作成したPDFに引き継がれない場合があります。</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="disclaimer">このツールは無保証です。ご利用は自己責任でお願いします。大切なファイルは、処理結果を確認してから元のファイルを整理してください。</p>
+      <ul class="footer-meta">
+        <li>パスワード付きのPDFは扱えません</li>
+        <li>目安：1ファイル200MB・合計500ページまで</li>
+        <li id="offline-status">オフライン対応：準備中</li>
+        <li>版 <span id="app-version"></span></li>
+        <li><a href="https://github.com/masatakeya/offline-pdf-tools" rel="noopener">ソースコード（GitHub）</a></li>
+        <li><a href="./licenses.html">使用しているライブラリ</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

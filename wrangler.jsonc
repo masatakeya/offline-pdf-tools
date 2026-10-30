@@ -1,0 +1,8 @@
+{
+  // Cloudflare Workers の静的アセット配信の設定（Workerのスクリプトは使わない）
+  "name": "offline-pdf-tools",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public"
+  }
+}
